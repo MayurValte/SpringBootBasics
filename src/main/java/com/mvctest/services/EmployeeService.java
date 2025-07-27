@@ -2,6 +2,7 @@ package com.mvctest.services;
 
 import com.mvctest.dto.EmployeeDTO;
 import com.mvctest.entityies.EmployeeEntity;
+import com.mvctest.exceptions.ResourceNotFoundException;
 import com.mvctest.repositoryies.EmployeeRepo;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -47,26 +48,25 @@ public class EmployeeService {
 
     public EmployeeDTO updateEmpById(Long empId, EmployeeDTO employeeDTO) {
         EmployeeEntity toUpdateEmp = mapper.map(employeeDTO, EmployeeEntity.class);
-        boolean isEmpPresent = checkIfEmpExistById(empId);
-        if(!isEmpPresent) return null;
+        checkIfEmpExistById(empId);
         toUpdateEmp.setId(empId);
         EmployeeEntity savedEmp = empRepo.save(toUpdateEmp);
         return mapper.map(savedEmp, EmployeeDTO.class);
     }
-    public boolean checkIfEmpExistById(Long empId){
-        return empRepo.existsById(empId);
+
+    public void checkIfEmpExistById(Long empId) {
+        boolean exists = empRepo.existsById(empId);
+        if (!exists) throw new ResourceNotFoundException("Employee not found with empId " + empId);
     }
 
     public boolean deleteEmpById(Long empId) {
-        boolean exist =checkIfEmpExistById(empId);
-        if(!exist) return false;
+        checkIfEmpExistById(empId);
         empRepo.deleteById(empId);
         return true;
     }
 
     public EmployeeDTO updatePartialByEmpId(Long empId, Map<String, Object> updates) {
-        boolean exists = checkIfEmpExistById(empId);
-        if(!exists) return null;
+        checkIfEmpExistById(empId);
         EmployeeEntity employeeEntity = empRepo.findById(empId).get();
         updates.forEach((field,value)->{
             Field fieldToUpdate = ReflectionUtils.findField(EmployeeEntity.class, field);

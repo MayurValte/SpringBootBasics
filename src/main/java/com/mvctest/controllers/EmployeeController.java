@@ -1,6 +1,7 @@
 package com.mvctest.controllers;
 
 import com.mvctest.dto.EmployeeDTO;
+import com.mvctest.exceptions.ResourceNotFoundException;
 import com.mvctest.services.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class EmployeeController {
     public ResponseEntity<EmployeeDTO> getEmpById(@PathVariable(name = "empId") Long id){
         Optional<EmployeeDTO> employeeByIdOptional = service.getEmployeeById(id);
        return employeeByIdOptional.map(employeeDTO -> ResponseEntity.ok(employeeDTO))
-                .orElseThrow(()-> new NoSuchElementException("Employee not found"));
+                .orElseThrow(()-> new ResourceNotFoundException("Employee not found"));
     }
 
     @GetMapping(path = "/getAllEmployee")
